@@ -1,0 +1,11 @@
+package agent.sample;
+
+/**
+ * @author zacconding
+ * @Date 2018-08-13
+ * @GitHub : https://github.com/zacscoding
+ */
+public interface TempService {
+
+    String generateUUID();
+}
