@@ -1,7 +1,9 @@
 package agent.sample;
 
+import agent.configuration.context.module.ActionModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
+import com.google.inject.Scopes;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
@@ -14,6 +16,7 @@ import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 public class SampleConfig extends GuiceServletContextListener {
 
     protected Injector getInjector() {
+        System.out.println("## getInjector is called..");
         return Guice.createInjector(new ServletModule() {
             @Override
             protected void configureServlets() {
@@ -25,7 +28,7 @@ public class SampleConfig extends GuiceServletContextListener {
 //                    bind(resource);
 //                }
 
-                bind(TempResources.class);
+                bind(TempResources.class).in(Scopes.SINGLETON);
 
                 /* bind jackson converters for JAXB/JSON serialization */
                 //                bind(MessageBodyReader.class).to(JacksonJsonProvider.class);
@@ -33,6 +36,6 @@ public class SampleConfig extends GuiceServletContextListener {
 
                 serve("/*").with(GuiceContainer.class);
             }
-        }, new TempServiceModule());
+        }, new TempServiceModule(), new ActionModule());
     }
 }

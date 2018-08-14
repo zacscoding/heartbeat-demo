@@ -1,7 +1,7 @@
 package agent.sample;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Singleton;
+import com.google.inject.Scopes;
 
 /**
  * @author zacconding
@@ -12,6 +12,6 @@ public class TempServiceModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        bind(TempService.class).to(TempServiceImpl.class).in(Singleton.class);
+        bind(TempService.class).to(TempServiceImpl.class).in(Scopes.SINGLETON);
     }
 }

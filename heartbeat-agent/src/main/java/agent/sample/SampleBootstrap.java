@@ -1,11 +1,14 @@
 package agent.sample;
 
 import com.google.inject.servlet.GuiceFilter;
+import java.util.Arrays;
 import java.util.EnumSet;
 import javax.servlet.DispatcherType;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.servlet.DefaultServlet;
 import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * @author zacconding
@@ -14,9 +17,12 @@ import org.eclipse.jetty.servlet.ServletContextHandler;
  */
 public class SampleBootstrap {
 
+    private static final Logger logger = LoggerFactory.getLogger("bootstrap");
+
     private Server server;
 
     public static void main(String[] args) throws Exception {
+        logger.info(">> Start to agent. args : {}", Arrays.toString(args));
         new SampleBootstrap().run();
     }
 

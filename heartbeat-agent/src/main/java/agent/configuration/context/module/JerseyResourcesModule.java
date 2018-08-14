@@ -1,4 +1,4 @@
-package agent.configuration.guice;
+package agent.configuration.context.module;
 
 import agent.sample.TempResources;
 import com.google.inject.servlet.ServletModule;
@@ -26,5 +26,4 @@ public class JerseyResourcesModule extends ServletModule {
         //                }
         bind(TempResources.class);
     }
-
 }
