@@ -16,4 +16,8 @@ public interface ActionExecutioner {
      * Get remain queue size
      */
     int queueSize();
+
+    void start();
+
+    void stop();
 }

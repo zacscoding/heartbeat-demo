@@ -18,9 +18,9 @@ public class DefaultActionListener implements ActionListener {
 
     private BlockingQueue<Action> actionQueue;
 
-    @Inject
-    public DefaultActionListener(@Named("actionQueue") BlockingQueue<Action> actionQueue) {
+    public DefaultActionListener(BlockingQueue<Action> actionQueue) {
         Objects.requireNonNull(actionQueue, "ActionQueue must be not null");
+        logger.trace("DefaultActionListener is created. actionQueue : {}", actionQueue);
         this.actionQueue = actionQueue;
     }
 
@@ -28,5 +28,6 @@ public class DefaultActionListener implements ActionListener {
     public void requestAction(Action action) {
         logger.debug("receive new action : " + action);
         actionQueue.offer(action);
+        // TODO :: push message
     }
 }

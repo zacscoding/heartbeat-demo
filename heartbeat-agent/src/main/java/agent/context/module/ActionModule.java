@@ -1,10 +1,10 @@
-package agent.configuration.context.module;
+package agent.context.module;
 
 import agent.action.Action;
 import agent.action.ActionExecutioner;
 import agent.action.ActionListener;
-import agent.configuration.context.provider.ActionExecutionerProvider;
-import agent.configuration.context.provider.ActionListenerProvider;
+import agent.context.provider.ActionExecutionerProvider;
+import agent.context.provider.ActionListenerProvider;
 import com.google.inject.AbstractModule;
 import com.google.inject.Provides;
 import com.google.inject.Scopes;

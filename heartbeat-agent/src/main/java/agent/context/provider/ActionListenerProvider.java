@@ -1,4 +1,4 @@
-package agent.configuration.context.provider;
+package agent.context.provider;
 
 import agent.action.Action;
 import agent.action.ActionListener;

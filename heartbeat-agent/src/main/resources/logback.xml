@@ -6,9 +6,6 @@
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} %p [%c{1}] %m%n</pattern>
         </encoder>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>INFO</level>
-        </filter>
     </appender>
 
     <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
@@ -23,9 +20,6 @@
         <encoder>
             <pattern>%d{HH:mm:ss.SSS} %p [%c{1}] %m%n</pattern>
         </encoder>
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>TRACE</level>
-        </filter>
     </appender>
 
     <appender name="ASYNC" class="ch.qos.logback.classic.AsyncAppender">
@@ -35,15 +29,21 @@
         <!-- Logger will block incoming events (log calls) until queue will free some space -->
         <!-- (the smaller value -> flush occurs often) -->
         <queueSize>100</queueSize>
-
         <appender-ref ref="FILE"/>
     </appender>
 
-    <root level="TRACE">
+    <root level="info">
         <appender-ref ref="STDOUT"/>
         <appender-ref ref="ASYNC"/>
     </root>
 
+    <logger name="bootstrap" level="TRACE"/>
+    <logger name="heartbeat" level="INFO"/>
+    <logger name="context" level="TRACE"/>
     <logger name="action" level="TRACE"/>
+    <logger name="receiver" level="TRACE"/>
+    <logger name="message" level="WARN"/>
+
+    <logger name="temp" level="ALL"/>
 
 </configuration>

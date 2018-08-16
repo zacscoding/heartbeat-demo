@@ -1,7 +1,8 @@
-package agent.configuration.context.module;
+package agent.context.module;
 
-import agent.sample.TempResources;
+import agent.receiver.TempResource;
 import com.google.inject.servlet.ServletModule;
+import com.sun.jersey.api.core.PackagesResourceConfig;
 import com.sun.jersey.guice.spi.container.servlet.GuiceContainer;
 
 /**
@@ -19,11 +20,11 @@ public class JerseyResourcesModule extends ServletModule {
 
     private void bindResources() {
         // TODO :: NOT WORKING YET.
-        //                PackagesResourceConfig resourceConfig = new PackagesResourceConfig("agent.resource");
-        //                for (Class<?> resource : resourceConfig.getClasses()) {
-        //                    System.out.println("## Try to bind : " + resource.getName());
-        //                    bind(resource);
-        //                }
-        bind(TempResources.class);
+        //        PackagesResourceConfig resourceConfig = new PackagesResourceConfig("agent.receiver");
+        //        for (Class<?> resource : resourceConfig.getClasses()) {
+        //            System.out.println("## Try to bind : " + resource.getName());
+        //            bind(resource);
+        //        }
+        bind(TempResource.class);
     }
 }
