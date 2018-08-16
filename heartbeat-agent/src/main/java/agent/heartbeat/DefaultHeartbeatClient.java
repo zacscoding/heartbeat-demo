@@ -1,26 +1,21 @@
 package agent.heartbeat;
 
+import agent.action.Action;
 import agent.action.ActionListener;
 import agent.context.AppProperties;
 import agent.exception.HeartbeatException;
 import agent.message.MessageQueue;
 import agent.util.HeartbeatThreadFactory;
-import java.util.Collection;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
-import javax.ws.rs.RuntimeType;
+import javax.ws.rs.ProcessingException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
-import javax.ws.rs.core.Configuration;
-import javax.ws.rs.core.Feature;
-import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.slf4j.Logger;
@@ -41,7 +36,6 @@ public class DefaultHeartbeatClient implements HeartbeatClient {
     private List<String> adminServerUrls;
     private HeartbeatAgent heartbeatAgent;
     private Client restClient;
-
 
     public DefaultHeartbeatClient(MessageQueue messageQueue, ActionListener actionListener) {
         this.messageQueue = messageQueue;
@@ -76,15 +70,21 @@ public class DefaultHeartbeatClient implements HeartbeatClient {
         HeartbeatRequest request = new HeartbeatRequest();
         request.setHeartbeatAgent(heartbeatAgent);
         request.setMessages(messageQueue.pollMessages());
+        request.setTimestamp(System.currentTimeMillis());
 
         for (String serverUrl : adminServerUrls) {
-            serverUrl += "/heartbeat";
+            StringBuilder requestUrl = new StringBuilder(serverUrl.length() + 10);
+            requestUrl.append(serverUrl).append("/heartbeat");
             try {
-                tryBeat(serverUrl, request);
+                tryBeat(requestUrl.toString(), request);
             } catch (HeartbeatException e) {
                 logger.warn("Invalid response in tryBeat(). response : " + e.getResponse());
             } catch (Exception e) {
-                logger.warn("Excetion occur while tryBeat(). server url : " + serverUrl, e);
+                if (e.getClass().isAssignableFrom(ProcessingException.class)) {
+                    logger.warn("ProcessingException occur while tryBeat(). server url : " + serverUrl + ", reason : " + e.getMessage());
+                } else {
+                    logger.warn("Exception occur while tryBeat(). server url : " + serverUrl, e);
+                }
             }
         }
     }
@@ -100,6 +100,11 @@ public class DefaultHeartbeatClient implements HeartbeatClient {
         }
 
         HeartbeatResponse heartbeatResponse = response.readEntity(HeartbeatResponse.class);
+        if (heartbeatResponse.hasActions()) {
+            for (Action action : heartbeatResponse.getActions()) {
+                actionListener.requestAction(action);
+            }
+        }
     }
 
     private void initialize() {

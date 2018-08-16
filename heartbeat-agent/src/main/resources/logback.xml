@@ -38,11 +38,11 @@
     </root>
 
     <logger name="bootstrap" level="TRACE"/>
-    <logger name="heartbeat" level="INFO"/>
+    <logger name="heartbeat" level="TRACE"/>
     <logger name="context" level="TRACE"/>
     <logger name="action" level="TRACE"/>
     <logger name="receiver" level="TRACE"/>
-    <logger name="message" level="WARN"/>
+    <logger name="message" level="TRACE"/>
 
     <logger name="temp" level="ALL"/>
 

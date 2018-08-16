@@ -64,33 +64,49 @@ public class DefaultActionExecutioner implements ActionExecutioner {
     }
 
     private boolean execute(Action action) {
+        // return executeInternal(action);
         return dummyExecute(action);
     }
 
+    private boolean executeInternal(Action action) {
+        throw new UnsupportedOperationException("Have to add real action logic in here");
+    }
+
     private boolean dummyExecute(Action action) {
-        pushMessage(action, ">> Execute action : " + action.toString());
+        pushProgressMessage(action, ">> Execute action : " + action.toString());
         try {
             int sleepSec = new Random().nextInt(5) + 1;
 
-            pushMessage(action, ">>> temp sleep : " + sleepSec + " sec in execute action");
+            pushProgressMessage(action, ">>> temp sleep : " + sleepSec + " sec in execute action");
             for (int i = 0; i < sleepSec; i++) {
-                pushMessage(action, ">>>> Execute something... " + i);
+                pushProgressMessage(action, ">>>> Execute something... " + i);
                 TimeUnit.SECONDS.sleep(1L);
             }
 
             return true;
         } catch (InterruptedException e) {
             logger.warn("InterruptedException while waiting a few sec in executing action", e);
-            pushMessage(action, "InterruptedException while waiting a few sec in executing action" + e.getMessage());
+            pushProgressMessage(action, "InterruptedException while waiting a few sec in executing action" + e.getMessage());
             return false;
         }
     }
 
-    private void pushMessage(Action action, String log) {
+    private void pushProgressMessage(Action action, String log) {
         Map<String, Object> results = new HashMap<>();
 
         results.put("action", action);
+        results.put("type", "INPROGRESS");
         results.put("log", log);
+
+        messageQueue.add(new Message("action", results));
+    }
+
+    private void pushResultMessage(Action action, boolean result) {
+        Map<String, Object> results = new HashMap<>();
+
+        results.put("action", action);
+        results.put("type", "COMPLETE");
+        results.put("result", result);
 
         messageQueue.add(new Message("action", results));
     }
@@ -103,6 +119,7 @@ public class DefaultActionExecutioner implements ActionExecutioner {
                     isExecuting = true;
                     logger.info("> Take action : " + action);
                     boolean result = execute(action);
+                    pushResultMessage(action, result);
                     isExecuting = false;
                     logger.info(">> execute action result : {}\n", result);
                 }

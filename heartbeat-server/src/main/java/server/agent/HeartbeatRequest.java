@@ -1,11 +1,10 @@
-package agent.heartbeat;
+package server.agent;
 
-import agent.message.Message;
 import java.util.List;
 
 /**
  * @author zacconding
- * @Date 2018-08-16
+ * @Date 2018-08-17
  * @GitHub : https://github.com/zacscoding
  */
 public class HeartbeatRequest {
