@@ -42,7 +42,7 @@
     <logger name="context" level="TRACE"/>
     <logger name="action" level="TRACE"/>
     <logger name="receiver" level="TRACE"/>
-    <logger name="message" level="TRACE"/>
+    <logger name="message" level="WARN"/>
 
     <logger name="temp" level="ALL"/>
 

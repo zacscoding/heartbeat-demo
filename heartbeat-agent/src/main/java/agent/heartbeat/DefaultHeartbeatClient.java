@@ -36,6 +36,8 @@ public class DefaultHeartbeatClient implements HeartbeatClient {
     private List<String> adminServerUrls;
     private HeartbeatAgent heartbeatAgent;
     private Client restClient;
+    // using single instance
+    private HeartbeatRequest heartbeatRequest;
 
     public DefaultHeartbeatClient(MessageQueue messageQueue, ActionListener actionListener) {
         this.messageQueue = messageQueue;
@@ -67,16 +69,15 @@ public class DefaultHeartbeatClient implements HeartbeatClient {
             return;
         }
 
-        HeartbeatRequest request = new HeartbeatRequest();
-        request.setHeartbeatAgent(heartbeatAgent);
-        request.setMessages(messageQueue.pollMessages());
-        request.setTimestamp(System.currentTimeMillis());
+        heartbeatRequest.setHeartbeatAgent(heartbeatAgent);
+        heartbeatRequest.setMessages(messageQueue.pollMessages());
+        heartbeatRequest.setTimestamp(System.currentTimeMillis());
 
         for (String serverUrl : adminServerUrls) {
             StringBuilder requestUrl = new StringBuilder(serverUrl.length() + 10);
             requestUrl.append(serverUrl).append("/heartbeat");
             try {
-                tryBeat(requestUrl.toString(), request);
+                tryBeat(requestUrl.toString(), heartbeatRequest);
             } catch (HeartbeatException e) {
                 logger.warn("Invalid response in tryBeat(). response : " + e.getResponse());
             } catch (Exception e) {
@@ -93,7 +94,7 @@ public class DefaultHeartbeatClient implements HeartbeatClient {
         WebTarget target = restClient.target(serverUrl);
         Invocation.Builder invokeBuilder = target.request(MediaType.APPLICATION_JSON);
         Response response = invokeBuilder.post(Entity.entity(heartbeatRequest, MediaType.APPLICATION_JSON));
-        logger.debug(">> Heartbeat reseult. url : {} , status : {}", serverUrl, response.getStatus());
+        logger.trace(">> Heartbeat reseult. url : {} , status : {}", serverUrl, response.getStatus());
 
         if ((response.getStatus() != Response.Status.OK.getStatusCode() || !response.hasEntity())) {
             throw new HeartbeatException(response);
@@ -121,5 +122,8 @@ public class DefaultHeartbeatClient implements HeartbeatClient {
         // server endpoints
         this.adminServerUrls = appProperties.getAdminServerUrls();
         this.restClient = ClientBuilder.newClient();
+
+        // using single instance
+        this.heartbeatRequest = new HeartbeatRequest();
     }
 }

@@ -25,7 +25,6 @@ public class Bootstrap {
 
     public static void main(String[] args) throws Exception {
         logger.info(">> Start to agent. args : {}", Arrays.toString(args));
-        AppProperties.getAppProperties();
         new Bootstrap().run();
     }
 
@@ -44,7 +43,9 @@ public class Bootstrap {
             server.start();
             server.join();
         } finally {
-            server.destroy();
+            if (server != null && server.isRunning()) {
+                server.destroy();
+            }
         }
     }
 

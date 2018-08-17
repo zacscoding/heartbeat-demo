@@ -7,6 +7,7 @@
   <script src="/webjars/jquery/jquery.min.js"></script>
   <script src="/webjars/sockjs-client/sockjs.min.js"></script>
   <script src="/webjars/stomp-websocket/stomp.min.js"></script>
+  <script src="/webjars/bootstrap/js/bootstrap.min.js"></script>
   <script src="/action.js"></script>
 </head>
 <body>
@@ -39,8 +40,8 @@
       <div class="col-md-4">
         <select class="form-control" id="actionType">
           <option value="START">START</option>
-          <option value="START">STOP</option>
-          <option value="START">RESTART</option>
+          <option value="STOP">STOP</option>
+          <option value="RESTART">RESTART</option>
         </select>
       </div>
       <div class="col-md-2">
@@ -57,93 +58,43 @@
           <th>Action result</th>
         </tr>
         </thead>
-        <tbody id="action-results">
+        <tbody>
+        <tr>
+          <td>
+            <div class="panel panel-default" id="action-results">
+            </div>
+          </td>
+        </tr>
+        <!--<tr>
+          <td>
+            <div class="panel panel-default">
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#collapse1">Collapsible panel</a>
+                </h4>
+              </div>
+              <div id="collapse1" class="panel-collapse collapse">
+                <div class="panel-body">Panel Body</div>
+                <div class="panel-footer">Panel Footer</div>
+              </div>
+
+              <div class="panel-heading">
+                <h4 class="panel-title">
+                  <a data-toggle="collapse" href="#collapse2">Collapsible panel</a>
+                </h4>
+              </div>
+              <div id="collapse2" class="panel-collapse collapse">
+                <div class="panel-body">Panel Body</div>
+                <div class="panel-footer">Panel Footer</div>
+              </div>
+            </div>
+          </td>
+        </tr>-->
         </tbody>
       </table>
     </div>
   </div>
 </div>
 
-<script>
-  var existAgent = false;
-
-  function getAgents() {
-    $.ajax({
-      url    : 'agents',
-      success: function (agents) {
-        console.log('> success to get agents\n', agents);
-        var html = '';
-        if (agents) {
-          existAgent = true;
-          for (var i = 0, size = agents.length; i < size; i++) {
-            var agentName = agents[i].agentName;
-            html += '<option value="' + agentName + '">' + agentName + '</option>';
-          }
-        } else {
-          html = '<option>No Agents</option>';
-        }
-
-        var $target = $('#agent');
-        $target.empty();
-        $target.append(html);
-      },
-      error  : function (jqxhr) {
-        console.log('> failed to get agents\n', jqxhr);
-      }
-    });
-  }
-
-  var stompClient = null;
-
-  function requestAction(agentName, serviceName, actionType) {
-    if (!isConnected()) {
-      console.log('try to connect..');
-      var socket = new SockJS('/heartbeat-websocket');
-      stompClient = Stomp.over(socket);
-      stompClient.connect({}, function (frame) {
-        console.log('Connected: ' + frame);
-        stompClient.send('/app/action/' + agentName + '/' + serviceName + '/' + actionType, {}, JSON.stringify({}));
-        var subscribe = stompClient.subscribe('/result/action/' + agentName + '/' + serviceName + '/' + actionType, function (result) {
-          console.log('> receive message : ', result);
-        });
-      });
-    } else {
-      console.log('already connected');
-      stompClient.send('/app/action/' + agentName + '/' + serviceName + '/' + actionType, {}, JSON.stringify({}));
-      var subscribe = stompClient.subscribe('/result/action/' + agentName + '/' + serviceName + '/' + actionType, function (result) {
-        console.log('> receive message : ', result);
-      });
-    }
-  }
-
-  function isConnected() {
-    console.log('check stompClient..', stompClient);
-    if (typeof stompClient === 'undefined' || !stompClient) {
-      return false;
-    }
-
-    return stompClient.connected;
-  }
-
-  $(function () {
-    (function initialize() {
-      getAgents();
-    })();
-
-    $('#btnAction').click(function () {
-      var agentName = $('#agent option:selected').val();
-      var serviceName = $('#serviceName').val();
-      var actionType = $('#actionType option:selected').val();
-      if (!serviceName) {
-        alert('Service name is empty');
-        $('#serviceName').focus();
-        return;
-      }
-
-      requestAction(agentName, serviceName, actionType);
-    });
-  });
-
-</script>
 </body>
 </html>

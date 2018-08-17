@@ -34,7 +34,7 @@ public class HeartbeatController {
             return ResponseEntity.badRequest().build();
         }
 
-        logger.info("## Heartbeat request : " + request);
+        logger.trace("## Heartbeat request : " + request);
 
         // regist agent
         agentService.receiveBeat(agent, request.getTimestamp());
@@ -46,7 +46,7 @@ public class HeartbeatController {
         HeartbeatResponse response = new HeartbeatResponse();
         response.setActions(agentService.pollActions(agent));
 
-        logger.info("## Heartbeat response : " + response);
+        logger.trace("## Heartbeat response : " + response);
 
         return ResponseEntity.ok(response);
     }

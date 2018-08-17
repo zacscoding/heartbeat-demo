@@ -36,14 +36,16 @@ public class ActionController {
         return ResponseEntity.ok(agentService.getAgents());
     }
 
-    @MessageMapping("/action/{agentName}/{serviceName}/{actionType}")
+    @MessageMapping("/action/{agentName}/{serviceName}/{actionType}/{requestId}")
     public Map<String, Object> requestAction(@DestinationVariable("agentName") String agentName
                                             , @DestinationVariable("serviceName") String serviceName
-                                            , @DestinationVariable("actionType") String actionTypeName) {
-        logger.info("request action. agentName : {}, serviceName : {}, actionType : {}", agentName, serviceName, actionTypeName);
+                                            , @DestinationVariable("actionType") String actionTypeName
+                                            , @DestinationVariable("requestId") String requestId) {
+        logger.info("request action. agentName : {}, serviceName : {}, actionType : {}, requestId : {}", agentName, serviceName, actionTypeName, requestId);
         String resultMessage = null;
         boolean success = false;
         Map<String, Object> result = new HashMap<>();
+
         try {
             HeartbeatAgent agent = agentService.getAgentByName(agentName);
             if (agent == null) {
@@ -58,7 +60,8 @@ public class ActionController {
                     Action action = new Action();
                     action.setActionType(actionType);
                     action.setServiceName(serviceName);
-                    action.setRequestId(String.valueOf(System.currentTimeMillis()));
+                    // action.setRequestId(String.valueOf(System.currentTimeMillis()));
+                    action.setRequestId(requestId);
 
                     agentService.requestAction(agent, action);
                     success = true;

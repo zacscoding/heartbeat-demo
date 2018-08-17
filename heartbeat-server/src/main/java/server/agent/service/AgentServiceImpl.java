@@ -18,6 +18,8 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.task.TaskExecutor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import server.agent.Action;
@@ -43,6 +45,9 @@ public class AgentServiceImpl implements AgentService {
 
     @Autowired
     private SimpMessagingTemplate stompMessageTemplate;
+    @Autowired
+    @Qualifier("agentThreadPool")
+    private TaskExecutor taskExecutor;
 
     @PostConstruct
     private void setUp() {
@@ -121,7 +126,6 @@ public class AgentServiceImpl implements AgentService {
         Queue<Action> actionQueue = actionQueues.get(agent);
 
         if (actionQueue == null || actionQueue.isEmpty()) {
-            logger.warn("Action que is empty...");
             return Collections.emptyList();
         }
 
@@ -146,11 +150,15 @@ public class AgentServiceImpl implements AgentService {
             return;
         }
 
-        for (Message message : messages) {
-            if ("action".equals(message.getCommand())) {
-                handleActionMessage(agent, message.getResults());
+        taskExecutor.execute(() -> {
+            for (Message message : messages) {
+                if ("action".equals(message.getCommand())) {
+                    handleActionMessage(agent, message.getResults());
+                } else {
+                    throw new UnsupportedOperationException("Not supported message command : " + message.getCommand());
+                }
             }
-        }
+        });
     }
 
     private void handleActionMessage(HeartbeatAgent agent, Map<String, Object> results) {
@@ -158,9 +166,12 @@ public class AgentServiceImpl implements AgentService {
             // TODO :: Change Converter
             Map<String, Object> requestedAction = (Map<String, Object>) results.get("action");
             // Action requestedAction = (Action) results.get("action");
-            String destination = sendToPrefix + agent.getAgentName() + "/" + requestedAction.get("serviceName") + "/" + requestedAction.get("actionType");
+            String destination = appendPaths(sendToPrefix, (String)requestedAction.get("requestId"), agent.getAgentName()
+                                , (String)requestedAction.get("serviceName"), (String)requestedAction.get("actionType"));
+//            String destination =
+//                sendToPrefix + "/" + requestedAction.get("requestId") + "/" + agent.getAgentName() + "/" + requestedAction.get("serviceName") + "/" + requestedAction.get("actionType");
             stompMessageTemplate.convertAndSend(destination, results);
-        } catch(Exception e) {
+        } catch (Exception e) {
             logger.warn("Invalid message. " + e.getMessage());
         }
     }
@@ -171,12 +182,34 @@ public class AgentServiceImpl implements AgentService {
         }
 
         long now = System.currentTimeMillis();
-        SimpleDateFormat sdf= new SimpleDateFormat("yyyyMMdd HH:mm:ss,SSS");
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd HH:mm:ss,SSS");
         for (Map.Entry<HeartbeatAgent, Long> entry : registeredAgent.entrySet()) {
             long lastHeartbeat = entry.getValue();
             if ((now - lastHeartbeat) > deadAgentCriteria) {
                 logger.warn("[Dead Agent] : " + entry.getKey() + " - [Last heartbeat] : " + sdf.format(lastHeartbeat));
             }
         }
+    }
+
+    private String appendPaths(String ... paths) {
+        if (paths == null || paths.length == 0) {
+            return "";
+        }
+
+        int length = 0;
+        for (String path : paths) {
+            if (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
+            length += path.length();
+        }
+
+        StringBuilder sb = new StringBuilder(length);
+        sb.append(paths[0]);
+        for (int i = 1; i < paths.length; i++) {
+            sb.append("/").append(paths[i]);
+        }
+
+        return sb.toString();
     }
 }
