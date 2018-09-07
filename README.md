@@ -1,7 +1,10 @@
 ## Heartbeat agent + server demo  
 
 - Agent : guice + jersey + jetty  
-- Server : Spring boot + STOMP Websocket  
+- Server : Spring boot + STOMP Websocket
+
+#### Demo  
+![ezgif com-video-to-gif](https://user-images.githubusercontent.com/25560203/45211971-a4a3b780-b2ce-11e8-8ed1-0ffc7e071e1d.gif)  
 
 
 #### Getting started  
@@ -23,7 +26,7 @@ $java -jar heartbeat-agent/target/heartbeat-agent.jar
 
 ## in browser  
 http://localhost:8080/action.html
-```   
+```  
 
 #### Simple design  
 

@@ -2,6 +2,8 @@ package agent;
 
 import agent.context.AppProperties;
 import agent.context.module.InitializeGuiceModulesContextListener;
+import agent.server.JettyWebServer;
+import agent.server.WebServer;
 import com.google.inject.servlet.GuiceFilter;
 import java.util.Arrays;
 import java.util.EnumSet;
@@ -20,33 +22,15 @@ import org.slf4j.LoggerFactory;
 public class Bootstrap {
 
     private static final Logger logger = LoggerFactory.getLogger("bootstrap");
-
-    private Server server;
+    private WebServer webServer;
 
     public static void main(String[] args) throws Exception {
-        logger.info(">> Start to agent. args : {}", Arrays.toString(args));
         new Bootstrap().run();
     }
 
-    public void run() throws Exception {
-        server = new Server(8089);
-
-        ServletContextHandler rootContext = new ServletContextHandler();
-        rootContext.setContextPath("");
-        server.setHandler(rootContext);
-
-        rootContext.addEventListener(new InitializeGuiceModulesContextListener());
-        rootContext.addFilter(GuiceFilter.class, "/*", EnumSet.of(DispatcherType.REQUEST));
-        rootContext.addServlet(DefaultServlet.class, "/");
-
-        try {
-            server.start();
-            server.join();
-        } finally {
-            if (server != null && server.isRunning()) {
-                server.destroy();
-            }
-        }
+    private void run() throws Exception {
+        webServer = new JettyWebServer();
+        webServer.start();
+        webServer.await();
     }
-
 }

@@ -3,6 +3,7 @@ package server.web;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.apache.logging.log4j.simple.SimpleLogger;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,6 +42,7 @@ public class ActionController {
                                             , @DestinationVariable("serviceName") String serviceName
                                             , @DestinationVariable("actionType") String actionTypeName
                                             , @DestinationVariable("requestId") String requestId) {
+
         logger.info("request action. agentName : {}, serviceName : {}, actionType : {}, requestId : {}", agentName, serviceName, actionTypeName, requestId);
         String resultMessage = null;
         boolean success = false;

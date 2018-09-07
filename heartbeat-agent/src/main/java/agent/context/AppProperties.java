@@ -24,7 +24,9 @@ public class AppProperties {
     // heartbeat agent
     private int pid;
     private String agentName;
+    private String serverHost;
     private int serverPort;
+    private String contextPath;
     private long initDelay;
     private long period;
 
@@ -41,6 +43,14 @@ public class AppProperties {
         }
 
         return appProperties;
+    }
+
+    public String getServerHost() {
+        return serverHost;
+    }
+
+    public String getContextPath() {
+        return contextPath;
     }
 
     public int getPid() {
@@ -70,10 +80,13 @@ public class AppProperties {
     private AppProperties() {
         try {
             final String SERVER_PORT = "heartbeat.server.port";
+            final String SERVER_HOST = "heartbeat.server.host";
+            final String SERVER_CONTEXT_PATH = "heartbeat.server.contextpath";
             final String INIT_DELAY = "heartbeat.initdelay";
             final String PERIOD = "heartbeat.period";
             final String ADMIN_SERVER_URLS = "heartbeat.admin.server.urls";
             final String AGENT_NAME = "heartbeat.agent.name";
+
 
             Properties properties = new Properties();
             // default load
@@ -82,7 +95,11 @@ public class AppProperties {
 
             // agent
             this.agentName = properties.getProperty(AGENT_NAME);
+
+            this.serverHost = properties.getProperty(SERVER_HOST, "");
             this.serverPort = Integer.parseInt(properties.getProperty(SERVER_PORT));
+            this.contextPath = properties.getProperty(SERVER_CONTEXT_PATH, "/");
+
             this.pid = extractPID();
             this.initDelay = Long.parseLong(properties.getProperty(INIT_DELAY));
             this.period = Long.parseLong(properties.getProperty(PERIOD));
