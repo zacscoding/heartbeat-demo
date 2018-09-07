@@ -1,5 +1,6 @@
 var existAgent = false;
 var stompClient = null;
+var requestCount = 0;
 
 function getAgents() {
   console.log('getAgents is called..');
@@ -29,9 +30,16 @@ function getAgents() {
 }
 
 function requestAction(agentName, serviceName, actionType) {
+  if (requestCount == 0) {
+    $('.panel-collapse.in').collapse('hide');
+  }
+  requestCount++;
+
+  $('#action-results').css('display', 'block');
+
   if (!isConnected()) {
     console.log('try to connect..');
-    var socket = new SockJS('/server/heartbeat-websocket');
+    var socket = new SockJS('/heartbeat-websocket');
     stompClient = Stomp.over(socket);
     stompClient.connect({}, function (frame) {
       console.log('Connected: ' + frame);
@@ -66,9 +74,11 @@ function sendAndSubscribe(agentName, serviceName, actionType) {
             $('#collapse-' + requestId).collapse('toggle');
           }
         } else if (result.type == 'COMPLETE') {
+          requestCount--;
           $textarea.val($($textarea).val() + '\n' + '>>>>>>>>>>    COMPLETE    <<<<<<<<<<\n\n');
-          $('.panel-collapse.in').collapse('hide');
-          $('#collapse-' + requestId).collapse('toggle');
+          if (requestCount > 0) {
+            $('.panel-collapse.in').collapse('hide');
+          }
           subscribe.unsubscribe();
         }
         $textarea.scrollTop($textarea[0].scrollHeight);

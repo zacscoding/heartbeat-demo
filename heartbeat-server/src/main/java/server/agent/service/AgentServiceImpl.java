@@ -170,6 +170,7 @@ public class AgentServiceImpl implements AgentService {
                                 , (String)requestedAction.get("serviceName"), (String)requestedAction.get("actionType"));
 //            String destination =
 //                sendToPrefix + "/" + requestedAction.get("requestId") + "/" + agent.getAgentName() + "/" + requestedAction.get("serviceName") + "/" + requestedAction.get("actionType");
+            System.out.println("## Send message :: " + results);
             stompMessageTemplate.convertAndSend(destination, results);
         } catch (Exception e) {
             logger.warn("Invalid message. " + e.getMessage());

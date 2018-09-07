@@ -1,6 +1,8 @@
 package agent.context;
 
 import agent.util.StringUtil;
+import java.io.File;
+import java.io.FileReader;
 import java.lang.management.ManagementFactory;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -24,9 +26,10 @@ public class AppProperties {
     // heartbeat agent
     private int pid;
     private String agentName;
-    private String serverHost;
     private int serverPort;
-    private String contextPath;
+    private String serverContext;
+    private int serverMinThread;
+    private int serverMaxThread;
     private long initDelay;
     private long period;
 
@@ -45,14 +48,6 @@ public class AppProperties {
         return appProperties;
     }
 
-    public String getServerHost() {
-        return serverHost;
-    }
-
-    public String getContextPath() {
-        return contextPath;
-    }
-
     public int getPid() {
         return pid;
     }
@@ -63,6 +58,18 @@ public class AppProperties {
 
     public int getServerPort() {
         return serverPort;
+    }
+
+    public String getServerContext() {
+        return serverContext;
+    }
+
+    public int getServerMinThread() {
+        return serverMinThread;
+    }
+
+    public int getServerMaxThread() {
+        return serverMaxThread;
     }
 
     public long getInitDelay() {
@@ -80,26 +87,40 @@ public class AppProperties {
     private AppProperties() {
         try {
             final String SERVER_PORT = "heartbeat.server.port";
-            final String SERVER_HOST = "heartbeat.server.host";
-            final String SERVER_CONTEXT_PATH = "heartbeat.server.contextpath";
+            final String SERVER_CONTEXT = "heartbeat.server.context";
+            final String SERVER_THREAD_MIN = "heartbeat.server.minthread";
+            final String SERVER_THREAD_MAX = "heartbeat.server.maxthread";
             final String INIT_DELAY = "heartbeat.initdelay";
             final String PERIOD = "heartbeat.period";
             final String ADMIN_SERVER_URLS = "heartbeat.admin.server.urls";
             final String AGENT_NAME = "heartbeat.agent.name";
 
-
             Properties properties = new Properties();
             // default load
             properties.load(AppProperties.class.getClassLoader().getResourceAsStream("app.properties"));
             // TODO ::  override & vm args
+            String configFilePath = System.getProperty("heartbeat.config.file");
+            if (StringUtil.isEmpty(configFilePath)) {
+                logger.info("Empty vm args [heartbeat.config.file] >>> Will use default properties");
+            } else {
+                File configFile = new File(configFilePath);
+                if (!configFile.exists()) {
+                    logger.warn("Not exist config file : " + configFilePath);
+                } else {
+                    if (!configFilePath.endsWith(".properties")) {
+                        logger.warn("Config file is not property file format. config file : " + configFilePath);
+                    } else {
+                        properties.load(new FileReader(configFile));
+                    }
+                }
+            }
 
             // agent
             this.agentName = properties.getProperty(AGENT_NAME);
-
-            this.serverHost = properties.getProperty(SERVER_HOST, "");
             this.serverPort = Integer.parseInt(properties.getProperty(SERVER_PORT));
-            this.contextPath = properties.getProperty(SERVER_CONTEXT_PATH, "/");
-
+            this.serverContext = properties.getProperty(SERVER_CONTEXT, "");
+            this.serverMinThread = Integer.parseInt(properties.getProperty(SERVER_THREAD_MIN));
+            this.serverMaxThread = Integer.parseInt(properties.getProperty(SERVER_THREAD_MAX));
             this.pid = extractPID();
             this.initDelay = Long.parseLong(properties.getProperty(INIT_DELAY));
             this.period = Long.parseLong(properties.getProperty(PERIOD));
